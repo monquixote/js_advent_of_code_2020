@@ -1,6 +1,6 @@
 const fs = require('fs');
 
-const [ruleStrings, input] = fs.readFileSync('./input19.txt', 'utf-8')
+const [ruleStrings, input] = fs.readFileSync(process.argv[2], 'utf-8')
     .trim()
     .split('\n')
     .reduce((arr, c) => {
@@ -91,6 +91,8 @@ function checkAgainstRules(inputArr, ruleBook) {
 const myRules = createRules(ruleStrings);
 
 const results = inputArrs.map(x => checkAgainstRules(x,myRules));
+console.log(JSON.stringify(results));
 console.log(results.filter(x => x === true).length)
 
 // Ex1 ans 178
+// Target 346
