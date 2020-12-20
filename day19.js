@@ -30,13 +30,17 @@ function createCharMatcher(potential) {
 function createRuleMatcher(ruleList, ruleBook) {
     return (input) => {
         let remainder = input
-        for (rule of ruleList) {
-            // console.log(`Processing rule ${rule}`,remainder)
-            remainder = ruleBook[rule](remainder)
-            if(remainder === false || remainder === true)  {
+        for (let i = 0; i < ruleList.length; i++) {
+            remainder = ruleBook[ruleList[i]](remainder)
+           
+            if (remainder === false || remainder === true) {
                 return remainder;
             }
-            if(remainder.length === 0) {
+            
+            if ( remainder.length === 0) {
+                if(i !== ruleList.length -1) {
+                    return false;
+                }
                 return true;
             }
         }
@@ -46,13 +50,14 @@ function createRuleMatcher(ruleList, ruleBook) {
 
 function processClause(clauseStr, ruleBook) {
     // If there is no second rule it's equivalent to always 'false'
-    if(!clauseStr) {
-        return () => false;
+    if (!clauseStr) {
+        return () => {
+            return false;
+        }
     }
     const ruleList = clauseStr
         .trim()
         .split(' ')
-    // Single rules are always matching a char
     if (ruleList.length === 1 && isNaN(Number(ruleList[0]))) {
         const potential = ruleList[0];
         return createCharMatcher(potential)
@@ -66,10 +71,10 @@ function processRule(rule, ruleBook) {
     const func1 = processClause(first, ruleBook)
     const func2 = processClause(second, ruleBook)
     ruleBook[ruleNo] = (input) => {
-        const result = func1(input,ruleBook)
-        if(result !== false) {
+        const result = func1(input, ruleBook)
+        if (result !== false) {
             return result;
-        } 
+        }
         return func2(input, ruleBook)
     }
 }
@@ -82,17 +87,14 @@ function createRules(ruleStrings) {
 
 function checkAgainstRules(inputArr, ruleBook) {
     const result = ruleBook['0'](inputArr);
-    if(result === true){
-        console.log('Valid: ', inputArr);        
+    if (result === true) {
     }
     return result
 }
 
 const myRules = createRules(ruleStrings);
-
-const results = inputArrs.map(x => checkAgainstRules(x,myRules));
-console.log(JSON.stringify(results));
+const results = inputArrs.map(x => checkAgainstRules(x, myRules));
 console.log(results.filter(x => x === true).length)
 
 // Ex1 ans 178
-// Target 346
+// Ex2 ans 346
