@@ -44,7 +44,7 @@ const countedEdges = allEdges
         }
         if (map.has(reversed)) {
             return map.set(reversed, map.get(reversed) + 1)
-        } 
+        }
         return map.set(edge, 1)
     }, new Map())
 
@@ -67,19 +67,19 @@ function flipH(arr) {
 
 function rotate(matrix) {
     const n = matrix.length;
-    const x = Math.floor(n/ 2);
+    const x = Math.floor(n / 2);
     const y = n - 1;
     for (let i = 0; i < x; i++) {
-       for (let j = i; j < y - i; j++) {
-          k = matrix[i][j];
-          matrix[i][j] = matrix[y - j][i];
-          matrix[y - j][i] = matrix[y - i][y - j];
-          matrix[y - i][y - j] = matrix[j][y - i]
-          matrix[j][y - i] = k
-       }
+        for (let j = i; j < y - i; j++) {
+            k = matrix[i][j];
+            matrix[i][j] = matrix[y - j][i];
+            matrix[y - j][i] = matrix[y - i][y - j];
+            matrix[y - i][y - j] = matrix[j][y - i]
+            matrix[j][y - i] = k
+        }
     }
     return matrix
-  }
+}
 
 const funcs = [flipV, flipH, rotate];
 
@@ -125,7 +125,7 @@ function completeRow(leftmostTile, allTiles) {
         // console.log(allTiles.length)
         // console.log('Found tile ', tileToEdges(next).map(x => x.join('')))
         current = modifyUntil(next, tile => {
-            const [top2, bottom2 , left2, right2] = tileToEdges(tile)
+            const [top2, bottom2, left2, right2] = tileToEdges(tile)
             // console.log(left2.join(''))
             return left2.join('') === right.join('')
         })
@@ -146,7 +146,7 @@ function allRows(cornerTile, remainingTiles) {
         }
         const [next] = getTileWithEdge(bottom, remainingTiles)
         current = modifyUntil(next, tile => {
-            const [top2, bottom2 , left2, right2] = tileToEdges(tile)
+            const [top2, bottom2, left2, right2] = tileToEdges(tile)
             return top2.join('') === bottom.join('')
         })
         currentTile = current
@@ -155,14 +155,58 @@ function allRows(cornerTile, remainingTiles) {
 }
 
 function removeEdges(tile) {
-    const tAndB = tile.slice(1,-1)
-    return tAndB.map(x => x.slice(1,-1))
+    const tAndB = tile.slice(1, -1)
+    return tAndB.map(x => x.slice(1, -1))
 }
 
 function joinRows(tiles) {
-    return tiles.reduce((p,c) => {
+    return tiles.reduce((p, c) => {
         return p.map((x, i) => [...x, ...c[i]])
     })
+}
+
+const seamonster =
+    `                  # 
+#    ##    ##    ###
+ #  #  #  #  #  #   `
+
+const seamonsterIndex = seamonster
+    .split('\n')
+    .map(line => line.split('').reduce((p, c, i) => {
+        if (c === '#') {
+            return [...p, i]
+        }
+        return p
+    }, []))
+
+function isMonster(image, i, j) {
+    return seamonsterIndex.every((x, index) => x.every(y => image[i + index] ? image[i + index][j + y] === '#' : false))
+}
+
+function removeMonster(image, i, j) {
+    return seamonsterIndex.forEach((x, index) => x.forEach(y => image[i + index][j + y] = '0'))
+}
+
+function checkMonsters(image) {
+    for (let i = 0; i < image.length; i++) {
+        for (let j = 0; j < image[i].length; j++) {
+            if (isMonster(image, i, j)) {
+                return true
+            }
+        }
+    }
+    return false
+}
+
+function removeMonsters(image) {
+    for (let i = 0; i < image.length; i++) {
+        for (let j = 0; j < image[i].length; j++) {
+            if (isMonster(image, i, j)) {
+                removeMonster(image, i, j);
+            }
+        }
+    }
+    return image
 }
 
 function ex2() {
@@ -182,10 +226,13 @@ function ex2() {
     const result = allRows(topLeft, remainingTiles)
     const trimmed = result.map(row => row.map(removeEdges))
     const joined = trimmed.map(joinRows);
-    const concat = joined.reduce((p,c) => [...p, ...c])
-    console.log(concat.map(x => x.join('')))
-    // const strings = trimmed.map(row => row.join(''))
-    // console.log(strings)
+    const concat = joined.reduce((p, c) => [...p, ...c])
+    
+    const monstered = modifyUntil(concat, checkMonsters)
+    const sansMonsters = removeMonsters(monstered)
+    console.log(sansMonsters.map(x => x.join('')))
+    const roughness = sansMonsters.flatMap(x => x.filter(y => y === '#')).length
+    console.log(roughness)
 }
 
 ex2()
